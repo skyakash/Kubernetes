@@ -1,4 +1,4 @@
-#Create a 3 node Kubernetes cluster on a Ubuntu 20.04 VMs
+**Create a 3 node Kubernetes cluster on a Ubuntu 20.04 VMs**
 
 1. Create 3 VMs with Ubuntu 20.04, username: ubuntu, machine names: master, worker1, worker2
 2. update the VM
