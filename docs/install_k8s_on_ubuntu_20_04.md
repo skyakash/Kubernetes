@@ -99,3 +99,5 @@ kubeadm join 192.168.68.129:6443 --token k94ju3.l4drm9e700p5uscy --discovery-tok
 
 Links:
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd
+
