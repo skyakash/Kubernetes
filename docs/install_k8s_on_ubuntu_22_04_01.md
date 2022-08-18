@@ -8,15 +8,16 @@ ip a
 ```
 
 **Use Mobaxterm, log into machines and use MultiExec option to execute same commands on all 3 machines together**
+
 3. Update the VM
 ```
-sudo apt-get update
+sudo apt update
 ```
 4. edit /etc/hosts and add entry of nodes
 ```
-192.168.68.129 master
-192.168.68.130 worker1
-192.168.68.131 worker2
+192.168.68.139 master22
+192.168.68.140 worker122
+192.168.68.141 worker222
 ```
 
 5. Disable firewall 
