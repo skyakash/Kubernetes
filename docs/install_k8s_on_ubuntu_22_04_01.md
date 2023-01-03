@@ -1,6 +1,6 @@
 **Create a 3 node Kubernetes cluster on a Ubuntu 20.04 VMs** -- Work in progress - DO NOT USE ----
 
-1. Create 3 VMs with Ubuntu 22.04.01 LTS Server edition, Install OpenSSH server during VM creation, username: akash, machine names: master22, worker122, worker222
+1. Create 3 VMs with Ubuntu 22.04.01 LTS Server edition, Install OpenSSH server during VM creation, username: akash, machine names: k8smaster, k8sworker1, k8sworker2
 2. Note IP address of VMs
 ```
 sudo apt-get install openssh-server -y
