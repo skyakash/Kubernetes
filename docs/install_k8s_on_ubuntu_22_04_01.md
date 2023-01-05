@@ -1,4 +1,4 @@
-**Create a 3 node Kubernetes cluster on a Ubuntu 20.04 VMs** -- Work in progress - DO NOT USE ----
+**Create a 3 node Kubernetes cluster on a Ubuntu 22.04 VMs** 
 
 1. Create 3 VMs with Ubuntu 22.04.01 LTS Desktop edition, Install OpenSSH server during VM creation, username: akash, machine names: k8smaster, k8sworker1, k8sworker2
 2. Note IP address of VMs
@@ -7,7 +7,8 @@ sudo apt-get install openssh-server -y
 ip a
 ```
 
-**Use Mobaxterm, log into machines and use MultiExec option to execute same commands on all 3 machines together**
+**Use Mobaxterm, log into machines and use MultiExec option to execute same commands on all 3 machines together. To paste content on all terminals use ctrl+shift+ins**
+
 
 3. Update the VM
 ```
@@ -44,39 +45,74 @@ echo \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 sudo apt-get install containerd.io  
+```
 
+7. Create containerd configuration
+```
+sudo mkdir -p /etc/containerd
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+```
+Edit /etc/containerd/config.toml and set SystemdCgroup = true
+```
+sudo systemctl restart containerd
+```
 
-cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+8. Forwarding IPv4 and letting iptables see bridged traffic
+```
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
 EOF
 
 sudo modprobe overlay
 sudo modprobe br_netfilter
+
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+# Apply sysctl params without reboot
+sudo sysctl --system
+
+
+lsmod | grep br_netfilter
+lsmod | grep overlay
+sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward
 ```
 
-
-10. Installing kubeadm, kubelet and kubectl
+9. Installing kubeadm, kubelet and kubectl
 ```
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
 sudo apt install kubeadm kubelet kubectl kubernetes-cni
 
 ```
-11. Now run following commands only on master
+10. Now run following commands only on master
 ```
-sudo kubeadm init
-```
-12. copy join command 
+sudo kubeadm init --pod-network-cidr=10.11.0.0/16
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-13. install weave net 
+```
+11. Copy join command 
+
+12. Install calico, Download calico.yaml from https://raw.githubusercontent.com/projectcalico/calico/v3.24.5/manifests/calico.yaml
  ```
- kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+ kubectl apply -f calico.yaml
  ```
 
-14. Run following command only on workers to join then in cluster
+13. Run following command only on workers to join then in cluster
 ```
-kubeadm join 192.168.68.129:6443 --token k94ju3.l4drm9e700p5uscy --discovery-token-ca-cert-hash sha256:b887ebaf510b564979b3cd07bc2b8e2e7f55f2c389c6487c78712f86eb1c6211
+kubeadm join 192.168.68.123:6443 --token bgycye.pbwrq9ehcgyjy154 \
+        --discovery-token-ca-cert-hash sha256:6c20296d8a81770c1d283fe4a0a8a1e820ed164ebc316693ce45f71cc476c4e8
+        
+kubectl get po -A --watch
+kubectl get nodes -o wide
+        
 ```
  
 
