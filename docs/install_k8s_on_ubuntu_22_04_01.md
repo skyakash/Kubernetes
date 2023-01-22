@@ -124,3 +124,5 @@ https://serverfault.com/questions/1118051/failed-to-run-kubelet-validate-service
 https://docs.docker.com/engine/install/ubuntu/
 https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
 
+Set container runtime on node
+sudo crictl --runtime-endpoint unix:///run/containerd/containerd.sock config --set runtime-endpoint=unix:///run/containerd/containerd.sock
